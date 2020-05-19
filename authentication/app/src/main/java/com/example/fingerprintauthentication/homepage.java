@@ -1,28 +1,25 @@
 package com.example.fingerprintauthentication;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
-import android.os.Bundle;
-
-//
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.json.JSONException;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
+//
 //
 
 public class homepage extends AppCompatActivity {
@@ -72,12 +69,10 @@ public class homepage extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
     }
 
-    //g7 edit here
-    public void newpage(View view) {
+    
 
-            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-          //  Intent intent1 = new Intent(this, BluetoothActivity.class);
-          //  startActivity(intent1);
-
+    public void logout(View view) throws JSONException{
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }

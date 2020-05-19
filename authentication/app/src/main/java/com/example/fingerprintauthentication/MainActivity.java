@@ -1,8 +1,5 @@
 package com.example.fingerprintauthentication;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.app.KeyguardManager;
 import android.content.Intent;
@@ -14,15 +11,14 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -38,35 +34,15 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKey;
-
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONObject;
-
-
-
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
-
-
-
-/*
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
-import com.android.volley.Response;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-*/
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
     private FingerprintManager.CryptoObject cryptoObject;
     private FingerprintManager fingerprintManager;
     private KeyguardManager keyguardManager;
+    private KeyStore keystore;
 
 
     String login_info = "";
     boolean status = false;
+   // public Response response;
 
 
 
@@ -143,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void generateKey() throws FingerprintException {
         try {
-            // Obtain a reference to the Keystore using the standard Android keystore container identifier (“AndroidKeystore”)//
+
             keyStore = KeyStore.getInstance("AndroidKeyStore");
 
             //Generate the key//
@@ -207,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //start here ---g7s
-    public void login(View view){
+    public void login(View view) throws JSONException {
 
 
 
@@ -218,17 +196,29 @@ public class MainActivity extends AppCompatActivity {
         String password = pswrd.getText().toString();
 
 
-        Log.d("ERROR", "Username " + username +" "+ "Password " + password);
+        Log.d("ERROR", "Username " + "\"" + username + "\"" +" "+ "Password " + "\"" + password + "\"");
 
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        MediaType mediaType = MediaType.parse("application/json");
 
         // Instantiate the RequestQueue.
-        String url ="https://kix7tx694g.execute-api.us-east-1.amazonaws.com/dev/signIn/1001/"+ username+"/"+ password;
+        //String url ="https://kix7tx694g.execute-api.us-east-1.amazonaws.com/dev/signIn/1001";
+        String url ="https://kix7tx694g.execute-api.us-east-1.amazonaws.com/dev/signIn/2494100525";
 
-        okhttp3.Request request = new Request.Builder()
+        String json = "{\n\t\"username\": " + "\"" + username + "\"" + ",\n\t\"password\":"+ "\"" + password + "\"" + "\n}";
+
+
+        Log.d("json", json.toString());
+        RequestBody body = RequestBody.create(mediaType,json);
+        Request request = new Request.Builder()
                 .url(url)
+                .method("POST", body)
+                .addHeader("Content-Type", "application/json")
                 .build();
+
+       // try {
+             //Response response = client.newCall(request).execute();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -240,32 +230,32 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful()){
                     final String myResponse = response.body().string();
                     try{
-                         login_info = myResponse.toString();
-                         Log.d("Login status", login_info);
-                         //status = true;
-
-
+                        login_info = myResponse.toString();
+                        Log.d("Login status", login_info);
+                        //status = true;
 
                     }catch (Exception e){}
 
-
-
                 }
             }
-        });
+    });
 
-       //while (status == false) {}
-       //status = false;
-       try {
-           Thread.sleep(500);
-       }catch(Exception e){
+        try {
+            Thread.sleep(500);
+        }catch(Exception e){
 
-       }
-       Toast.makeText(getApplicationContext(), login_info, Toast.LENGTH_SHORT).show();
-       Intent intent = new Intent(this, homepage.class);
-       startActivity(intent);
+        }
 
-    }
-}
+        String stat = "{"+ "\"" + "status"+ "\"" +":" + "\"" + "login successful" +"\""+ "}";
+
+        Toast.makeText(getApplicationContext(), login_info, Toast.LENGTH_SHORT).show();
+        if(login_info.equals(stat)) {
+            Intent intent = new Intent(this, homepage.class);
+            startActivity(intent);
+            Intent intentgeo = new Intent(this, MyService.class);
+            startService(intentgeo);
+
+        }
+}}
 
 
